@@ -34,14 +34,10 @@ if __name__ == "__main__":
         p_XgY = getP_XgY(trainData, trainMeta)
         # for the given test file, predict using naive bayes
         y_predicted, y_prob = predictNaiveBayes(testData, testMeta,  p_Y, p_XgY)
+        # print the predictions
+        print('\n')
+        printPredictions(list(testData['class']), y_predicted, y_prob)
 
-
-
-
-
-
-
-        pass
     elif option == 't':
         # this option implements a bayes network that uses TAN
         pass

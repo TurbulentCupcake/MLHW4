@@ -69,7 +69,7 @@ def getP_XgY(data, meta):
 
         for y in Y:
             for x in X:
-                pd_table[y].loc[x] = (freq_table[y].loc[x]+1)/(freq_table[y].sum()+len(Y)+1) # likelihood with laplace smoothing
+                pd_table[y].loc[x] = (freq_table[y].loc[x]+1)/(freq_table[y].sum()+len(Y)) # likelihood with laplace smoothing
 
         feature_probability_table[feature] = pd_table
 
@@ -109,17 +109,28 @@ def predictNaiveBayes(data, meta, p_Y, p_XgY):
 
         # add up the each of the class_probs
         total_prob_sums = 0
-        for c in class_probs: total_prob_sums+=c
+        for c in class_probs.values(): total_prob_sums+=c
 
-        final_class_probs = class_probs.values()
+        final_class_probs = list(class_probs.values())
         for i in range(len(final_class_probs)): final_class_probs[i] /= total_prob_sums
 
         max_prob_loc = np.argmax(final_class_probs)
-        predictions.append(class_probs.keys()[max_prob_loc])
-        p_probabilities.append(class_probs.keys()[max_prob_loc])
+        predictions.append(list(class_probs.keys())[max_prob_loc])
+        p_probabilities.append(final_class_probs[max_prob_loc])
 
     return predictions, p_probabilities
-    
+
+
+def printPredictions(actual, predictions, probabilities):
+
+    match_count = 0
+    for a, p, prob in zip(actual, predictions, probabilities):
+        print(a, p, prob)
+        if a == p: match_count+=1
+
+    print('\n')
+    print(match_count)
+
 
 
 
