@@ -57,11 +57,11 @@ def getP_XgY(data, meta):
 
     for feature in meta.names():
         # create a frequency table for each feature
-        freq_table = getFrequencyTable(data, feature)
+        freq_table = getFrequencyTable(data, meta, feature)
 
         # create a probability distribution table for each feature
-        Y = getUniqueVals(data, 'class')
-        X = getUniqueVals(data, feature)
+        Y = [y.encode(encoding='UTF-8') for y in list(meta._attributes['class'][1])]
+        X = [x.encode(encoding='UTF-8') for x in list(meta._attributes[feature][1])]
 
         # create a table that holds the frequency
         pd_table = pd.DataFrame(np.zeros(len(Y) * len(X)).reshape((len(X), len(Y))),
@@ -69,9 +69,10 @@ def getP_XgY(data, meta):
 
         for y in Y:
             for x in X:
-                pd_table[y].loc[x] = (freq_table[y].loc[x]+1)/(freq_table[y].sum()+len(Y)) # likelihood with laplace smoothing
+                pd_table[y].loc[x] = (freq_table[y].loc[x])/(freq_table[y].sum()) # likelihood with laplace smoothing
 
         feature_probability_table[feature] = pd_table
+
 
     return feature_probability_table
 
@@ -87,8 +88,7 @@ def predictNaiveBayes(data, meta, p_Y, p_XgY):
     # then go through each of the probabilities and normalize them
     # then output the class of the largest one
 
-    Y = getUniqueVals(data,'class')
-
+    Y = [y.encode(encoding='UTF-8') for y in list(meta._attributes['class'][1])]
     predictions = [] # holds the predictions
     p_probabilities = [] # holds the confidence of the predictions
     for i,xdata in enumerate(data):
@@ -99,11 +99,9 @@ def predictNaiveBayes(data, meta, p_Y, p_XgY):
             class_probs[y] = 0
 
         for y in Y:
-            p_temp = 1
-            for x in meta.names():
+            p_temp = p_Y[y]
+            for x in meta.names()[0:(len(meta.names())-1)]:
                 p_temp *= p_XgY[x][y].loc[xdata[x]]
-
-            p_temp *= p_Y[y]
 
             class_probs[y] = p_temp
 
@@ -112,10 +110,10 @@ def predictNaiveBayes(data, meta, p_Y, p_XgY):
         for c in class_probs.values(): total_prob_sums+=c
 
         final_class_probs = list(class_probs.values())
-        for i in range(len(final_class_probs)): final_class_probs[i] /= total_prob_sums
+        for j in range(len(final_class_probs)): final_class_probs[j] /= total_prob_sums
 
         max_prob_loc = np.argmax(final_class_probs)
-        predictions.append(list(class_probs.keys())[max_prob_loc])
+        predictions.append(Y[max_prob_loc])
         p_probabilities.append(final_class_probs[max_prob_loc])
 
     return predictions, p_probabilities
@@ -125,54 +123,31 @@ def printPredictions(actual, predictions, probabilities):
 
     match_count = 0
     for a, p, prob in zip(actual, predictions, probabilities):
-        print(a, p, prob)
+        print(str(a,'utf-8'), str(p,'utf-8'), "{0:.12f}".format(prob))
         if a == p: match_count+=1
 
     print('\n')
     print(match_count)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     pass
 
 
+def getFrequencyTable(data, meta, feature):
 
-
-
-
-
-
-
-
-
-def getFrequencyTable(data, feature):
-
-    Y = getUniqueVals(data, 'class')
-    X = getUniqueVals(data, feature)
+    Y = [y.encode(encoding='UTF-8') for y in list(meta._attributes['class'][1])]
+    X = [x.encode(encoding='UTF-8') for x in list(meta._attributes[feature][1])]
 
     # create a table that holds the frequency
     table = pd.DataFrame(np.zeros(len(Y)*len(X)).reshape((len(X), len(Y))),
                          columns=Y, index=X)
 
-
     # fill in the count for each occurance
     for y, x in zip(data['class'],data[feature]):
+            table[y].loc[x]+=1
+
+    # add one laplace smoothing
+    for y in Y:
+        for x in X:
             table[y].loc[x]+=1
 
     return table
