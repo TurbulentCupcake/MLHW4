@@ -3,6 +3,8 @@ import sys
 import os
 from DataManipulations import *
 from funcs import *
+from MST import *
+
 
 if __name__ == "__main__":
 
@@ -41,6 +43,17 @@ if __name__ == "__main__":
 
     elif option == 't':
         # this option implements a bayes network that uses TAN
+        # for this first step, we need to compute the I (information gain) value
+        # for each combination of the X value.
+        # We will need to compute a bunch of probabilities before we can proceed with making the
+        # bayesian network itself.
+
+        # This function will return an NxN matrix which contains the information gain
+        # between every pair of features
+        I = getInfoGain(trainData, trainMeta)
+        print(I)
+
+        MST = prims(I, trainMeta)
 
 
         pass
