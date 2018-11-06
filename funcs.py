@@ -123,7 +123,7 @@ def predictNaiveBayes(data, meta, p_Y, p_XgY):
 def printPredictions(actual, predictions, probabilities):
 
     match_count = 0
-    for a, p, prob in zip(actual, predictions, probabilities):
+    for a, p, prob in zip(predictions, actual, probabilities):
         print(str(a,'utf-8'), str(p,'utf-8'), "{0:.12f}".format(prob))
         if a == p: match_count+=1
 
@@ -498,9 +498,76 @@ def getXigXjY(data, meta, feature1, feature2):
 
 
 
+def predictTAN(data, meta, CPT, MST):
+    """
+    Predicts output given set of input values
+    :param data: test data
+    :param meta: test meta data
+    :param CPT: conditional probability tables for each feature
+    :param MST: minimum spanning tree
+    :return: list of predictions and probabilities
+    """
+
+    # initialize set of predictions and probabilities
+    predictions = []
+    probabilities = []
+
+    Y = [y.encode(encoding='UTF-8') for y in list(meta._attributes['class'][1])]
+
+    # iterate through each data point
+    for d in data:
+
+        # return y probability calculations for all values of Y
+        y_prob = getYforX(d, meta, CPT, MST)
+
+        # compute sum of the values in y_prob
+        sum_prob = math.fsum(y_prob.values())
+
+        for k in y_prob.keys():
+            y_prob[k] /= sum_prob
+
+        probabilities.append(np.max(list(y_prob.values())))
+        predictions.append(list(y_prob.keys())[np.argmax(list(y_prob.values()))])
+
+        # print(list(y_prob.keys())[np.argmax(list(y_prob.values()))])
+        # print(np.max(list(y_prob.values())))
+
+    return predictions, probabilities
 
 
 
+
+def getYforX(data, meta, CPT, MST):
+    """
+    Returns y  value for a given data point
+    :param data: one datapoint
+    :param meta: metadata
+    :param CPT: conditinoal probability tables
+    :param MST: maximal spanning tree
+    :return: float value
+    """
+
+    features = meta.names()[0:(len(meta.names())-1)]
+    Y = [y.encode(encoding='UTF-8') for y in list(meta._attributes['class'][1])]
+
+    y_prob = dict()
+    for y in Y:
+
+        # P(Y)
+        p = CPT['class'][y]
+
+        for f in features:
+
+            # In case the feature is at the head and has only y as its only parent
+            if MST[f] is None:
+                p *= CPT[f][y].loc[data[f]]
+            # in case the feature has another parent node and y as its parent nodes
+            else:
+                p *= CPT[f][(data[f], data[MST[f]], y)]
+
+        y_prob[y] = p
+
+    return y_prob
 
 
 

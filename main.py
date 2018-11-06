@@ -62,6 +62,12 @@ if __name__ == "__main__":
         CPT = buildCPT(trainData, trainMeta, MST)
 
         # create predictions using constructed probability tables
+        predictions, probabilities = predictTAN(testData, testMeta, CPT, MST)
+        print('\n')
+        # print predictions
+        printPredictions(list(testData['class']), predictions, probabilities)
+
+
 
     else:
         print("Invalid option")
