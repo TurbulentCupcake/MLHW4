@@ -7,6 +7,7 @@ def maxKey(V, K, mstSet):
     max_val = None
     for v in V:
         if K[v] > max and v not in mstSet:
+
             max = K[v]
             max_val = v
     return max_val
@@ -15,7 +16,6 @@ def maxKey(V, K, mstSet):
 def prims(I, meta):
     """
     Uses prims algorithm to compute a minimum spanning tree
-    Uses a max-heap
     :param I: Adjacency matrix containing mutual information (?)
     :return: not sure yet lol]
     """
@@ -46,7 +46,6 @@ def prims(I, meta):
         # append the maximum weight vertex to the list
         mstSet.append(u)
 
-
         for v2 in V:
             if I[v2].loc[u] > 0 and v2 not in mstSet and K[v2] < I[v2].loc[u]:
                 K[v2] = I[v2].loc[u]
@@ -55,6 +54,7 @@ def prims(I, meta):
 
     for p in P.keys():
         print(p, P[p])
+
 
 
 

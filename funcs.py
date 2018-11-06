@@ -285,7 +285,7 @@ def getInfoGain(data, meta):
                     P_XXgY[y] = pd_table
 
                 ################################################################################
-
+                # print(P_XXgY)
                 # obtain P(Xi|Y) and P(Xj|Y) for both features
                 P_XigY = P_XgY[x_i]
                 P_XjgY = P_XgY[x_j]
@@ -297,18 +297,20 @@ def getInfoGain(data, meta):
                 # to get the conditional probabilities for each given y.
 
                 ######################## This computes P(xi,xj,y) ##############################
-                P_XXY = dict()
 
-                for y in Y:
+                #
+                # for y in Y:
+                #
+                #     table = pd.DataFrame(np.zeros(P_XXgY[y].shape), columns=P_XXgY[y].columns, index = P_XXgY[y].index)
+                #
+                #     for v1 in X[x_i]:
+                #         for v2 in X[x_j]:
+                #
+                #             table[v2].loc[v1] = P_XXgY[y][v2].loc[v1]*P_Y[y]
+                #
+                #     P_XXY[y] = table
 
-                    table = pd.DataFrame(np.zeros(P_XXgY[y].shape), columns=P_XXgY[y].columns, index = P_XXgY[y].index)
-
-                    for v1 in X[x_i]:
-                        for v2 in X[x_j]:
-
-                            table[v2].loc[v1] = P_XXgY[y][v2].loc[v1]*P_Y[y]
-
-                    P_XXY[y] = table
+                P_XXY = getP_XXY(data, meta, x_i, x_j)
 
                 ################################################################################
 
@@ -319,12 +321,65 @@ def getInfoGain(data, meta):
                 for v1 in X[x_i]:
                     for v2 in X[x_j]:
                         for y in Y:
-                            I_value += P_XXY[y][v2].loc[v1]*\
+                            I_value += P_XXY[(v1,v2,y)]*\
                                        math.log((P_XXgY[y][v2].loc[v1]/(P_XigY[y].loc[v1]*P_XjgY[y].loc[v2])), 2)
 
                 infoGain[x_i].loc[x_j] = I_value
 
     return infoGain
+
+
+
+def getP_XXY(data, meta, feature1, feature2):
+
+    """
+    Returns the P(xi, xj, y) for a given combination of
+    feature values and y
+    :param data: dataset
+    :param meta: metadata
+    :param feature1: first feature
+    :param feature2: second feature
+    :param y_label: selected y label for return probability
+    :return: a dictionary with value combination probability
+    """
+
+    # narrow down the necessary features for the defined features
+    Y = [y.encode(encoding='UTF-8') for y in list(meta._attributes['class'][1])]
+    X1 = [x.encode(encoding='UTF-8') for x in list(meta._attributes[feature1][1])]
+    X2 = [x.encode(encoding='UTF-8') for x in list(meta._attributes[feature2][1])]
+
+    # get all combinations of probabilities for the given set of features and y-label
+    f_dict = dict()
+
+    for x_1 in X1:
+        for x_2 in X2:
+            for y in Y:
+                f_dict[(x_1, x_2, y)] = 0
+
+    # iterate through the dataset to find out positions that share the values that
+    # match the keys of the dictionary
+
+    for d in data:
+        f_dict[(d[feature1], d[feature2], d['class'])]+=1
+
+    # add 1 to each value in the hashmap (laplacian smoothing)
+    for k in f_dict.keys():
+        f_dict[k] += 1
+
+    # get the sum of the values
+    total = math.fsum(f_dict.values())
+
+    # divide each value in the counts with the new sum
+
+    for k in f_dict.keys():
+        f_dict[k] /= total
+
+    return f_dict
+
+
+
+
+
 
 
 
