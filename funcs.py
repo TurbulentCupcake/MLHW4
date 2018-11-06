@@ -312,6 +312,7 @@ def getInfoGain(data, meta):
 
                 P_XXY = getP_XXY(data, meta, x_i, x_j)
 
+                # print(P_XXY)
                 ################################################################################
 
                 # Now we have obtained P_XXgY, P_XXY, PXigY and PXjgY
@@ -370,11 +371,136 @@ def getP_XXY(data, meta, feature1, feature2):
     total = math.fsum(f_dict.values())
 
     # divide each value in the counts with the new sum
-
     for k in f_dict.keys():
         f_dict[k] /= total
 
     return f_dict
+
+
+
+def printTAN(MST):
+
+    for k,v in zip(MST.keys(), MST.values()):
+        if v == None:
+            print(k, "class")
+        else:
+            print(k, v, "class")
+
+
+
+def buildCPT(data, meta, MST):
+    """
+    Builds conditional probability tables for the connections in the bayesian network
+    described in the MST
+    :param data: dataset
+    :param meta: metadata
+    :param MST: Minimum spanning tree in dictionary form
+    :return: list of conditional probability tables for each node
+    """
+
+    # This function builds the conditional probability tables for each node in the dataset
+    # For the labels, it will simply be its own probability distribution
+    # For the head node which doesn't have a parent except for Y, the
+    # probability calculation will be P(Xi|Y)
+    # For the remaining nodes which have its own parent node and Y,
+    # the probability has to be calculated as P(Xi|Xj,Y) because
+    # the probability of Xi occuring is dependent on the parent probabilities both occuring
+    # according to the structure of our bayes network.
+
+    CPT = dict()
+    P_XgY = getP_XgY(data, meta)
+
+    for k, v in zip(MST.keys(), MST.values()):
+
+
+        # In the case that our current node doesn't have a parent, then we must
+        # assume that its only parent is Y, in which case we will only calculate
+        # P(Xi|Y)
+        if v == None:
+            CPT[k] = P_XgY[k]
+        else:
+            # in this case, we will need to compute the P(Xi|Xj,Y) for
+            # every Xi and its corresponding Xj and Y.
+            # This means that we need to extract the values of Xi, Xj and Y
+            # from the present feature and parent feature and the Y labels
+            # and compute the probabilities for each by subsetting the
+            # the dataset based on a combination of values of Xj and Y
+            # and compute the number of times a given value of Xi occurs in the
+            # specified combination of the values.
+
+            curr_node = k
+            parent_node = v
+            CPT[k] = getXigXjY(data, meta, k, v)
+
+    CPT['class'] = getProbabilityDistribution(data, meta, 'class')
+
+    return CPT
+
+
+
+def getXigXjY(data, meta, feature1, feature2):
+    """
+    This function returns the conditional probability of
+    Xi given Xj and Y
+    :param data: dataset
+    :param meta:    metadata
+    :param feature1:    Xi from P(Xi|Xj,Y)
+    :param feature2:    Xj from P(Xi|Xj,Y)
+    :return: a dictionary with every combination of Xi, Xj and Y with an associated probability value
+    """
+
+    Y = [y.encode(encoding='UTF-8') for y in list(meta._attributes['class'][1])]
+    X1 = [x.encode(encoding='UTF-8') for x in list(meta._attributes[feature1][1])]
+    X2 = [x.encode(encoding='UTF-8') for x in list(meta._attributes[feature2][1])]
+
+    # create a dictionary hold the probability
+    f_dict = dict()
+    p_dict = dict()
+    for y in Y:
+        for x_j in X2:
+            for x_i in X1:
+                p_dict[(x_i, x_j, y)] = 0
+                f_dict[(x_i, x_j, y)] = 0
+
+    # add up all possible combination occurances into our dictionary
+    for d in data:
+        f_dict[(d[feature1], d[feature2], d['class'])]+=1
+
+    # add 1 for laplacian smoothing
+    for k in f_dict.keys():
+        f_dict[k]+=1
+
+
+    # Now, we know that our dictionary contains the number of times each combination of
+    # occurances appears in the dataset. Now, we know that for a P(Xi|Xj,Y) the idea is
+    # to seperate out the dataset where we hold Xj and Y to constant values and vary the
+    # Xi. If our counters work as expected, then it has to be that the sum of those
+    # combinations with the p_dict structure for Xj and Y constant but varying Xi
+    # should give us the same number of data points in the dataset when Xj and Y are
+    # held constant. With this in mind, we can compute the P(Xi|Xj, Y) as the number of
+    # counts for a given Xi divided by the total number of counts for all possible Xi, holding
+    # Xj and Y constant/
+
+    for y in Y:
+        for x_j in X2:
+
+            # compute the total number of occurances of Xi for the given Xj and Y
+            subfeature_total = 0
+            for x_i in X1:
+                subfeature_total+= f_dict[(x_i,x_j,y)]
+
+            # divide all frequency counts for values of Xi with the obtained subfeature_total
+            for x_i in X1:
+                p_dict[(x_i,x_j,y)] = f_dict[(x_i,x_j,y)]/subfeature_total
+
+    return p_dict
+
+
+
+
+
+
+
 
 
 

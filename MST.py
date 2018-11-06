@@ -51,13 +51,7 @@ def prims(I, meta):
                 K[v2] = I[v2].loc[u]
                 P[v2] = u
 
-
-    for p in P.keys():
-        print(p, P[p])
-
-
-
-
+    return P
 
 
 

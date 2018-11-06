@@ -8,7 +8,7 @@ from MST import *
 
 if __name__ == "__main__":
 
-    print(sys.argv)
+    # print(sys.argv)
     if len(sys.argv) != 4:
         raise ImportError("Not enough arguments")
 
@@ -51,12 +51,18 @@ if __name__ == "__main__":
         # This function will return an NxN matrix which contains the information gain
         # between every pair of features
         I = getInfoGain(trainData, trainMeta)
-        print(I)
 
+        # build MST
         MST = prims(I, trainMeta)
 
+        # print the MST
+        printTAN(MST)
 
-        pass
+        # build conditional probability tables
+        CPT = buildCPT(trainData, trainMeta, MST)
+
+        # create predictions using constructed probability tables
+
     else:
         print("Invalid option")
         exit(0)
