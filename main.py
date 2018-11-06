@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     if option == 'n':
         # this option implements a bayes network that uses naive bayes
-        # printNB_graph(trainMeta)
+        printNB_graph(trainMeta)
 
         # count the probability of each Y value
         p_Y = getProbabilityDistribution(trainData, trainMeta, 'class')
@@ -38,8 +38,9 @@ if __name__ == "__main__":
         # for the given test file, predict using naive bayes
         y_predicted, y_prob = predictNaiveBayes(testData, testMeta,  p_Y, p_XgY)
         # print the predictions
-        print('\n')
+        print('')
         printPredictions(list(testData['class']), y_predicted, y_prob)
+        print('')
 
     elif option == 't':
         # this option implements a bayes network that uses TAN
@@ -63,9 +64,10 @@ if __name__ == "__main__":
 
         # create predictions using constructed probability tables
         predictions, probabilities = predictTAN(testData, testMeta, CPT, MST)
-        print('\n')
+        print('')
         # print predictions
         printPredictions(list(testData['class']), predictions, probabilities)
+        print('')
 
 
 

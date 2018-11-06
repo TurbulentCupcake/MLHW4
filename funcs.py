@@ -124,10 +124,14 @@ def printPredictions(actual, predictions, probabilities):
 
     match_count = 0
     for a, p, prob in zip(predictions, actual, probabilities):
-        print(str(a,'utf-8'), str(p,'utf-8'), "{0:.12f}".format(prob))
+        if str(a,'utf-8')[0] != "'":
+            print(str(a,'utf-8'), str(p,'utf-8'), round(prob, 12))
+        else:
+            print(str(a, 'utf-8')[1:(len(str(a, 'utf-8'))-1)]
+                  , str(p, 'utf-8')[1:(len(str(p, 'utf-8'))-1)], round(prob, 12))
         if a == p: match_count+=1
 
-    print('\n')
+    print('')
     print(match_count)
 
 
@@ -382,9 +386,9 @@ def printTAN(MST):
 
     for k,v in zip(MST.keys(), MST.values()):
         if v == None:
-            print(k, "class")
+            print(k, "class ")
         else:
-            print(k, v, "class")
+            print(k, v, "class ")
 
 
 
