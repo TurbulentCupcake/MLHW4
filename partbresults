@@ -1,0 +1,55 @@
+/home/adithya/anaconda3/envs/MLHW2/bin/python "/home/adithya/Desktop/FALL 18/CS760/Homeworks/MLHW4/KFoldCV.py"
+Fold- 0
+Computing Naive Bayes
+0.871875
+Computing TAN
+0.909375
+Fold- 1
+Computing Naive Bayes
+0.846875
+Computing TAN
+0.90625
+Fold- 2
+Computing Naive Bayes
+0.865625
+Computing TAN
+0.915625
+Fold- 3
+Computing Naive Bayes
+0.853125
+Computing TAN
+0.940625
+Fold- 4
+Computing Naive Bayes
+0.9125
+Computing TAN
+0.94375
+Fold- 5
+Computing Naive Bayes
+0.871875
+Computing TAN
+0.90625
+Fold- 6
+Computing Naive Bayes
+0.890625
+Computing TAN
+0.94375
+Fold- 7
+Computing Naive Bayesoverl
+0.871875
+Computing TAN
+0.925
+Fold- 8
+Computing Naive Bayes
+0.9125
+Computing TAN
+0.928125
+Fold- 9
+Computing Naive Bayes
+0.8607594936708861
+Computing TAN
+0.9018987341772152
+[0.871875   0.846875   0.865625   0.853125   0.9125     0.871875
+ 0.890625   0.871875   0.9125     0.86075949]
+[0.909375   0.90625    0.915625   0.940625   0.94375    0.90625
+ 0.94375    0.925      0.928125   0.90189873]

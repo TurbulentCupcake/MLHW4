@@ -1,7 +1,8 @@
 # this method is used to read, write and modify data for the arff files
 
 import scipy.io.arff as arff
-
+import collections
+import random
 
 def readData(filename):
     if filename == "None":
@@ -37,4 +38,6 @@ def getUniqueVals(data, feature):
             vals.append(val)
 
     return vals
+
+
 
